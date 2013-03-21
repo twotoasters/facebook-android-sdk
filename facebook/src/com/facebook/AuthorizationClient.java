@@ -16,6 +16,10 @@
 
 package com.facebook;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -25,6 +29,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.webkit.CookieSyncManager;
+
 import com.facebook.android.R;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
@@ -33,10 +38,6 @@ import com.facebook.model.GraphObject;
 import com.facebook.model.GraphObjectList;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.WebDialog;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 class AuthorizationClient implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -642,7 +643,11 @@ class AuthorizationClient implements Serializable {
             Result outcome = null;
 
             if (resultCode == Activity.RESULT_CANCELED) {
-                outcome = Result.createCancelResult(data.getStringExtra("error"));
+            	String message = "canceled";
+            	if(data != null) {
+            		message = data.getStringExtra("error");
+            	}
+                outcome = Result.createCancelResult(message);
             } else if (resultCode != Activity.RESULT_OK) {
                 outcome = Result.createErrorResult("Unexpected resultCode from authorization.", null);
             } else {
