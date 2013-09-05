@@ -16,6 +16,15 @@
 
 package com.facebook;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -26,6 +35,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.webkit.CookieSyncManager;
+
 import com.facebook.android.R;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.NativeProtocol;
@@ -36,11 +46,6 @@ import com.facebook.model.GraphObject;
 import com.facebook.model.GraphObjectList;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.WebDialog;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.Serializable;
-import java.util.*;
 
 class AuthorizationClient implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -132,8 +137,13 @@ class AuthorizationClient implements Serializable {
     }
 
     void startOrContinueAuth(AuthorizationRequest request) {
-        if (appEventsLogger == null || appEventsLogger.getApplicationId() != request.getApplicationId()) {
-            appEventsLogger = AppEventsLogger.newLogger(context, request.getApplicationId());
+        String requestAppId = request != null ? request.getApplicationId() : "";
+        if (appEventsLogger == null || !requestAppId.equals(appEventsLogger.getApplicationId())) {
+            if (request != null) {
+                appEventsLogger = AppEventsLogger.newLogger(context, requestAppId);
+            } else {
+                appEventsLogger = AppEventsLogger.newLogger(context);
+            }
         }
 
         if (getInProgress()) {
@@ -717,6 +727,7 @@ class AuthorizationClient implements Serializable {
             }
         }
 
+        @Override
         boolean tryAuthorize(final AuthorizationRequest request) {
             getTokenClient = new GetTokenClient(context, request.getApplicationId());
             if (!getTokenClient.start()) {
